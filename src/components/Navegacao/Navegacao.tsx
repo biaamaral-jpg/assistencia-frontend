@@ -1,0 +1,278 @@
+import { useState, type JSX } from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import "./Navegacao.css";
+
+import AuthRequests from "../../fetch/AuthRequest";
+
+function Navegacao(): JSX.Element {
+
+    const navigate = useNavigate();
+
+    const [menuAberto, setMenuAberto] = useState(false);
+
+    const isAuthenticated = (() => {
+
+        const isAuth = localStorage.getItem("isAuth");
+        const token = localStorage.getItem("token");
+
+        return !!(
+            isAuth &&
+            token &&
+            AuthRequests.checkTokenExpiry()
+        );
+
+    })();
+
+    const nome =
+        localStorage.getItem("nome") || "Usuário";
+
+    const email =
+        localStorage.getItem("email") || "";
+
+    const navegar = (rota: string) => {
+
+        if (rota === '/' && !isAuthenticated) {
+            navigate('/login');
+            setMenuAberto(false);
+            return;
+        }
+
+        navigate(rota);
+
+        setMenuAberto(false);
+
+    };
+
+    const sair = () => {
+
+        AuthRequests.removeToken();
+
+        navigate("/login");
+
+        setMenuAberto(false);
+
+    };
+
+    return (
+
+        <nav className="navegacao">
+
+            <div className="nav-container">
+
+                {/* LOGO */}
+
+                <button
+                    className="nav-logo-container"
+                    onClick={() => navegar("/")}
+                    type="button"
+                >
+
+                    <div className="nav-logo-mark">
+                        IT
+                    </div>
+
+                    <div className="nav-logo-text">
+
+                        <strong>
+                            InfoTech
+                        </strong>
+
+                        <span>
+                            Informática
+                        </span>
+
+                    </div>
+
+                </button>
+
+
+                {/* BOTÃO MOBILE */}
+
+                <button
+                    className="nav-toggle"
+                    onClick={() =>
+                        setMenuAberto(!menuAberto)
+                    }
+                    type="button"
+                    aria-label="Abrir menu"
+                >
+                    ☰
+                </button>
+
+
+                {/* MENU */}
+
+                <ul
+                    className={
+                        `nav-menu ${
+                            menuAberto
+                                ? "nav-menu-aberto"
+                                : ""
+                        }`
+                    }
+                >
+
+                    {/* HOME */}
+
+                    <li>
+
+                        <button
+                            className="nav-link"
+                            onClick={() => navegar("/")}
+                            type="button"
+                        >
+
+                            <span>⌂</span>
+
+                            Home
+
+                        </button>
+
+                    </li>
+
+
+                    {/* AGENDAMENTOS */}
+
+                    {isAuthenticated && (
+
+                        <li>
+
+                            <button
+                                className="nav-link"
+                                onClick={() =>
+                                    navegar(
+                                        "/lista/agendamentos"
+                                    )
+                                }
+                                type="button"
+                            >
+
+                                <span>📅</span>
+
+                                Agendamentos
+
+                            </button>
+
+                        </li>
+
+                    )}
+
+
+                    {/* CLIENTES */}
+
+                    {isAuthenticated && (
+
+                        <li>
+
+                            <button
+                                className="nav-link"
+                                onClick={() =>
+                                    navegar(
+                                        "/lista/clientes"
+                                    )
+                                }
+                                type="button"
+                            >
+
+                                <span>👤</span>
+
+                                Clientes
+
+                            </button>
+
+                        </li>
+
+                    )}
+
+
+                    {/* EQUIPAMENTOS */}
+
+                    {isAuthenticated && (
+
+                        <li>
+
+                            <button
+                                className="nav-link"
+                                onClick={() =>
+                                    navegar(
+                                        "/lista/equipamentos"
+                                    )
+                                }
+                                type="button"
+                            >
+
+                                <span>🖥️</span>
+
+                                Equipamentos
+
+                            </button>
+
+                        </li>
+
+                    )}
+
+
+                    {/* USUÁRIO */}
+
+                    {isAuthenticated ? (
+
+                        <li className="nav-user">
+
+                            <div className="nav-user-avatar">
+                                {nome.charAt(0).toUpperCase()}
+                            </div>
+
+                            <div className="nav-user-info">
+
+                                <strong>
+                                    {nome}
+                                </strong>
+
+                                <span>
+                                    {email}
+                                </span>
+
+                            </div>
+
+                            <button
+                                className="nav-logout"
+                                type="button"
+                                onClick={sair}
+                            >
+                                Sair
+                            </button>
+
+                        </li>
+
+                    ) : (
+
+                        <li>
+
+                            <button
+                                className="nav-link"
+                                onClick={() => navegar("/login")}
+                                type="button"
+                            >
+
+                                <span>🔐</span>
+
+                                Login
+
+                            </button>
+
+                        </li>
+
+                    )}
+
+                </ul>
+
+            </div>
+
+        </nav>
+
+    );
+}
+
+export default Navegacao;
